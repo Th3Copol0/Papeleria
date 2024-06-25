@@ -1,0 +1,10 @@
+            <li><a href="{{ url_for('productos') }}">Gestión de Productos</a></li>
+            <li><a href="{{ url_for('categorias') }}">Gestión de Categorías</a></li>
+            <li><a href="{{ url_for('proveedores') }}">Gestión de Proveedores</a></li>
+            <li><a href="{{ url_for('compras') }}">Gestión de Compras</a></li>
+            <li><a href="{{ url_for('ventas') }}">Gestión de Ventas</a></li>
+            <li><a href="{{ url_for('clientes') }}">Gestión de Clientes</a></li>
+            <li><a href="{{ url_for('reportes') }}">Reportes y Estadísticas</a></li>
+            <li><a href="{{ url_for('usuarios') }}">Gestión de Usuarios</a></li>
+            <li><a href="{{ url_for('configuracion') }}">Configuración</a></li>  
+            <li><a href="{{ url_for('logout') }}">Cerrar Sesión</a></li>

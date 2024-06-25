@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Papelería</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            /* Estilos para la animación de notificación */
+            .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color:red; /* Color de fondo */
+        color: white; /* Color del texto */
+        padding: 10px; /* Espaciado interno */
+        border-radius: 5px; /* Bordes redondeados */
+        animation: slideInRight 0.5s ease-in-out, slideOutRight 0.5s 2s ease-in-out forwards;
+        max-width: 300px; /* Ancho máximo del contenedor */
+        font-size: 16px; /* Tamaño de fuente */
+    }
+
+        /* Keyframes para la animación de entrada */
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Keyframes para la animación de salida */
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f2f5;
+            color: #1c1e21;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            margin-top: 60px; /* Espacio para la barra de alerta */
+            padding: 20px;
+            text-align: center; /* Centrar contenido */
+        }
+
+        h1 {
+            color: #1877f2;
+            margin-bottom: 40px;
+        }
+        nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        nav ul {
+            display: flex;
+            flex-direction: column;
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            gap: 20px;
+        }
+        nav ul li {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px 30px;
+            text-align: center;
+            width: 200px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        nav ul li:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        nav ul li a {
+            text-decoration: none;
+            color: #1877f2;
+            font-weight: 500;
+            display: block;
+        }
+        nav ul li a:hover {
+            color: #145dbf;
+        }
+    </style>
+<script>
+    function verificarStock() {
+        fetch('/verificar_stock') // Enviar solicitud a la ruta /verificar_stock en el servidor
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error en la solicitud');
+                }
+                return response.json();
+            })
+            .then(data => {
+                showNotifications(data.alertas_stock); // Llamar a la función showNotifications con la lista de alertas
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Error al conectar con el servidor');
+            });
+    }
+
+    // Función para mostrar las notificaciones con las alertas enviadas desde el backend
+    function showNotifications(alertas) {
+        var notification = document.createElement('div');
+        notification.classList.add('notification');
+        alertas.forEach(alerta => {
+            var p = document.createElement('p');
+            p.textContent = alerta;
+            notification.appendChild(p);
+        });
+        document.body.appendChild(notification);
+
+        // Temporizador para ocultar las notificaciones después de 5 segundos
+        setTimeout(function() {
+            notification.classList.add('slideOutRight');
+            setTimeout(function() {
+                notification.remove();
+            }, 500); // Espera 0.5 segundos para remover la notificación
+        }, 5000); // Espera 5 segundos antes de iniciar la animación de salida
+    }
+</script>
+</head>
+<body>
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+            <button onclick="verificarStock()">Verificar Stock</button>
+            <a href="{{ url_for('cambiar_clave') }}">Cambiar Clave</a>
+            
+</body>
+</html>

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Cambiar Clave</title>
+</head>
+<body>
+    <h1>Cambiar Clave</h1>
+    <form action="/cambiar_clave" method="POST" onsubmit="return validarClave()">
+        <!-- Agregar el campo 'nueva_clave' -->
+        <label for="nueva_clave">Nueva Clave:</label>
+        <input type="password" id="nueva_clave" name="nueva_clave" required>
+        <br>
+        <button type="submit">Cambiar Clave</button>
+    </form>
+</body>
+</html>
