@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estadísticas de Ventas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Estadísticas de Ventas</h1>
+    <ul>
+        <li><a href="{{ url_for('index') }}">Volver al Menú Principal</a></li>
+    </ul>
+    <table>
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Total Vendido</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for estadistica in estadisticas %}
+            <tr>
+                <td>{{ estadistica['nombre'] }}</td>
+                <td>{{ estadistica['total_vendido'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <canvas id="ventasChart"></canvas>
+    <script>
+        var ctx = document.getElementById('ventasChart').getContext('2d');
+        var ventasChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [
+                    {% for estadistica in estadisticas %}
+                    "{{ estadistica['nombre'] }}",
+                    {% endfor %}
+                ],
+                datasets: [{
+                    label: 'Total Vendido',
+                    data: [
+                        {% for estadistica in estadisticas %}
+                        {{ estadistica['total_vendido'] }},
+                        {% endfor %}
+                    ],
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

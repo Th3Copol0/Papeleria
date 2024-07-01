@@ -6,6 +6,9 @@ import schedule
 import time
 import threading
 from threading import Lock
+import numpy as np
+from datetime import datetime
+from fpdf import FPDF
 
 app = Flask(__name__, static_url_path='/static')
 db_lock = Lock()
@@ -436,7 +439,101 @@ def cambiar_clave():
             return render_template('cambiar_clave.html', clave_actual=clave_actual)
  
 
+@app.route('/ventas', methods=['GET', 'POST'])
+def ventas():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    conn = get_db_connection()
+    productos = conn.execute('SELECT * FROM productos').fetchall()
 
+    if request.method == 'POST':
+        ventas = []
+        for producto in productos:
+            producto_id = producto['id']
+            cantidad = request.form.get(f'cantidad_{producto_id}', 0)
+
+            try:
+                cantidad = int(cantidad)
+                if cantidad > 0:
+                    ventas.append((producto_id, cantidad))
+            except ValueError:
+                flash(f'La cantidad para el producto {producto["nombre"]} debe ser un número positivo.', 'error')
+                return redirect(request.url)
+
+        try:
+            for producto_id, cantidad in ventas:
+                conn.execute('INSERT INTO ventas (producto_id, cantidad) VALUES (?, ?)', 
+                             (producto_id, cantidad))
+            conn.commit()
+            flash('Ventas registradas con éxito', 'success')
+        except Exception as e:
+            flash(f'Error al registrar las ventas: {str(e)}', 'error')
+            conn.rollback()
+    
+    ventas = conn.execute('SELECT v.*, p.nombre as producto_nombre FROM ventas v LEFT JOIN productos p ON v.producto_id = p.id').fetchall()
+    conn.close()
+
+    return render_template('ventas.html', productos=productos, ventas=ventas)
+@app.route('/corte', methods=['POST'])
+def corte():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+
+    try:
+        # Generar estadísticas de ventas antes de borrar los datos
+        estadisticas_ventas = conn.execute(
+            'SELECT p.nombre, SUM(v.cantidad) as total_vendido '
+            'FROM ventas v '
+            'LEFT JOIN productos p ON v.producto_id = p.id '
+            'GROUP BY p.nombre '
+            'ORDER BY total_vendido DESC'
+        ).fetchall()
+
+        # Generar informe en PDF
+        generar_informe(estadisticas_ventas)
+
+        # Sumar todas las ventas por producto
+        ventas_agrupadas = conn.execute('SELECT producto_id, SUM(cantidad) as total_vendido FROM ventas GROUP BY producto_id').fetchall()
+
+        for venta in ventas_agrupadas:
+            producto_id = venta['producto_id']
+            total_vendido = venta['total_vendido']
+            
+            # Actualizar la cantidad en el inventario
+            conn.execute('UPDATE productos SET cantidad = cantidad - ? WHERE id = ?', (total_vendido, producto_id))
+        
+        # Limpiar la tabla de ventas
+        conn.execute('DELETE FROM ventas')
+        conn.commit()
+        flash('Corte realizado con éxito y productos actualizados.', 'success')
+
+    except Exception as e:
+        flash(f'Error al realizar el corte: {str(e)}', 'error')
+        conn.rollback()
+        estadisticas_ventas = []
+    finally:
+        conn.close()
+
+    return render_template('estadisticas_ventas.html', estadisticas=estadisticas_ventas)
+
+def generar_informe(estadisticas_ventas):
+    # Generar un informe en formato PDF con las estadísticas de ventas
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font('Arial', 'B', 12)
+    pdf.cell(0, 10, 'Informe de Ventas', 0, 1, 'C')
+    pdf.ln(10)
+
+    for estadistica in estadisticas_ventas:
+        pdf.cell(0, 10, f'Producto: {estadistica["nombre"]}, Total Vendido: {estadistica["total_vendido"]}', 0, 1)
+
+    # Guardar el informe como archivo PDF
+    fecha_actual = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    nombre_archivo = f'informe_ventas_{fecha_actual}.pdf'
+    pdf.output(nombre_archivo)
 if __name__ == '__main__':
     programar_verificacion_stock()  # Programar la verificación de stock
     scheduler_thread = threading.Thread(target=run_scheduler)

@@ -4,11 +4,14 @@
     <h1>Bienvenido a la Papelería</h1>
     <nav>
         <ul>
+            <li><a href="{{ url_for('ventas') }}">VENTAS</a></li>
+            
             <li><a href="{{ url_for('productos') }}">Gestión de Productos</a></li>
             <li><a href="{{ url_for('categorias') }}">Gestión de Categorías</a></li>
             <li><a href="{{ url_for('proveedores') }}">Gestión de Proveedores</a></li>
             <li><a href="{{ url_for('compras') }}">Gestión de Compras</a></li>
             <li><a href="{{ url_for('logout') }}">Cerrar Sesión</a></li>
+            
         </ul>
     </nav>
 

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Ventas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f2f5;
+            color: #1c1e21;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 40vh;
+        }
+
+        h1 {
+            color: #1877f2;
+            margin-bottom: 20px;
+        }
+
+        form {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        label {
+            font-weight: 500;
+        }
+
+        input, select {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #1877f2;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #145dbf;
+        }
+
+        a {
+            color: #1877f2;
+            text-decoration: none;
+            font-weight: 500;
+            margin-top: 20px;
+        }
+
+        a:hover {
+            color: #145dbf;
+        }
+    </style>
+</head>
+<body>
+    <h1>Registrar Ventas</h1>
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('agregar_producto') }}">Añadir Producto</a></li>
+            <li><a href="{{ url_for('index') }}">Volver al Menú Principal</a></li>
+        </ul>
+    </nav>
+    <form method="post" action="{{ url_for('ventas') }}">
+        <table>
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Cantidad Disponible</th>
+                    <th>Cantidad</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for producto in productos %}
+                <tr>
+                    <td>{{ producto['nombre'] }}</td>
+                    <td>{{ producto['cantidad'] }}</td>
+                    <td><input type="number" name="cantidad_{{ producto['id'] }}" min="0" value="0"></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit">Registrar Ventas</button>
+    </form>
+
+    <h2>Ventas Registradas</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for venta in ventas %}
+            <tr>
+                <td>{{ venta['producto_nombre'] }}</td>
+                <td>{{ venta['cantidad'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Botón de Corte -->
+    <form method="post" action="{{ url_for('corte') }}">
+        <button type="submit">Realizar Corte</button>
+    </form>
+</body>
+</html>
